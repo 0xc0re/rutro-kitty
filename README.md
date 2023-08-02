@@ -37,11 +37,11 @@ The game is implemented using HTML, CSS, and JavaScript with jQuery. Bootstrap i
 
 ### Running the Game
 
-To run the game, you will need to have acess to a webserver. An easy way is to use `http-server`. If you don't have it installed, you can install it using the following command:
+To run the game, you will need to have acess to a web server. An easy way is to use `http-server` to set one up locally. If you don't have it installed, you can install it using the following command:
 
-\`\`\`bash
+```
 npm install -g http-server
-\`\`\`
+```
 
 Once you have `http-server` installed, follow these steps:
 
