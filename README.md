@@ -1,5 +1,11 @@
 # Rutro Kitty
 
+<table align="center">
+  <tr>
+    <td><img src="https://github.com/0xc0re/rutro-kitty/assets/7865591/2190ff29-1b9f-4d2d-b6f7-5f0c28ac6410" alt="rutro-kitty" height="400"></td>    
+  </tr>
+</table>
+
 ## Overview
 
 Rutro Kitty is an interactive web game where the player controls a cat moving around the screen, interacting with bubbles, growing in size, and firing lasers.
@@ -50,3 +56,4 @@ Once you have `http-server` installed, follow these steps:
   3. Open your web browser and navigate to `http://localhost:8080` to play the game.
 
 Note: The port number may vary based on your configuration. Please refer to the command line output of `http-server` for the exact URL.
+
