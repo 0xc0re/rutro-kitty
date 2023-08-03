@@ -2,11 +2,12 @@
 
 <table align="center">
   <tr>
-    <td><img src="https://github.com/0xc0re/rutro-kitty/assets/7865591/2190ff29-1b9f-4d2d-b6f7-5f0c28ac6410" alt="rutro-kitty" height="400"></td>    
+    <td><img src="https://github.com/0xc0re/rutro-kitty/assets/7865591/94fcd18d-e98f-4a50-a75e-9f9005a0be11" alt="rutro-kitty" height="400"></td>    
   </tr>
 </table>
 
 ## Overview
+
 
 Rutro Kitty is an interactive web game where the player controls a cat moving around the screen, interacting with bubbles, growing in size, and firing lasers.
 
