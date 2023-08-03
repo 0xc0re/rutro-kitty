@@ -1,11 +1,15 @@
 $(document).ready(function () {
     class Cat {
-        constructor() {
+        constructor() {            
             this.size = 64;
+            this.minSize = 32; // Minimum size for the cat
+            this.maxSize = 512; // Maximum size for the cat
+            this.shrinkFactor = 0.02; // 2% shrink factor
+            this.growFactor = 0.1; // 10% growth factor
             this.x = $('#game-container').width() / 2 - this.size / 2;
             this.y = $('#game-container').height() / 2 - this.size / 2;
             this.speed = 4;
-            this.catImage = ""; // Placeholder for the cat image URL
+            this.catImage = "images/cat1.png"; // Placeholder for the cat image URL
             this.loadCatImages(); // Call the method to load cat images
         }
     
@@ -23,9 +27,13 @@ $(document).ready(function () {
             $('#cat').attr('src', this.catImage); // Change the src attribute to the new cat image
         }
         
-
+        shrink() {
+            this.size = Math.max(this.size * (1 - this.shrinkFactor), this.minSize);
+            this.setCss();
+        }
+    
         grow() {
-            this.size += 2;
+            this.size = Math.min(this.size * (1 + this.growFactor), this.maxSize);
             this.setCss();
         }
 
@@ -57,7 +65,8 @@ $(document).ready(function () {
     }
 
     class Bubble {
-        constructor() {
+        constructor(cat) {
+            this.cat = cat;
             this.$element = $('<div class="bubble"></div>');
             this.direction = { x: Math.random() * 2 - 1, y: Math.random() * 2 - 1 };
             this.$element.data('direction', this.direction); // Store direction data in the bubble
@@ -84,17 +93,20 @@ $(document).ready(function () {
         }
 
         randomDisappear() {
-            const randomDisappearTime = Math.random() * 10000 + 1000;
+            const randomDisappearTime = Math.random() * 20000 + 1000;
             setTimeout(() => {
-                this.$element.fadeOut(500, () => {
+                this.$element.animate({ width: 0, height: 0, opacity: 0 }, 500, () => {
                     this.$element.remove();
+                    this.cat.shrink(); // Call the shrink method on the cat
                 });
             }, randomDisappearTime);
         }
+        
     }
 
     class Game {
         constructor() {
+            this.minBubbles = 20;
             this.score = 0;
             this.cat = new Cat();
             this.keys = {};
@@ -110,11 +122,11 @@ $(document).ready(function () {
         }
 
         createBubblesIfNeeded() {
-            const maxBubbles = Math.min(20 + Math.floor(this.score / 20), 200);
+            const maxBubbles = Math.min(this.minBubbles + Math.floor(this.score / this.minBubbles), 200);
             while ($('.bubble').length < maxBubbles) {
-                new Bubble();
+                new Bubble(this.cat); // Pass the cat object to the Bubble constructor
             }
-        }
+        }      
 
         moveBubbles() {
             $('.bubble').each(function() {
