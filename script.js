@@ -4,8 +4,8 @@ $(document).ready(function () {
             this.size = 64;
             this.minSize = 32; // Minimum size for the cat
             this.maxSize = 512; // Maximum size for the cat
-            this.shrinkFactor = 0.02; // 2% shrink factor
-            this.growFactor = 0.1; // 10% growth factor
+            this.shrinkFactor = 0; // 2% shrink factor
+            this.growFactor = 0; // 10% growth factor
             this.x = $('#game-container').width() / 2 - this.size / 2;
             this.y = $('#game-container').height() / 2 - this.size / 2;
             this.speed = 4;
