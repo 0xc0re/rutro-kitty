@@ -33,19 +33,25 @@
             right: 10px;
             font-size: 20px;
             color: #333;
-        }
-
-        /* Added styles for arrow buttons */
-        #controls {
+        }        
+        
+       #controls {
             position: absolute;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            display: flex;
-            align-items: center;
+        }
+
+        .joystick {
+            width: 150px;
+            height: 150px;
+            position: relative;
+            border: 5px solid #333;
+            border-radius: 50%;
         }
 
         .arrow-btn {
+            position: absolute;
             width: 50px;
             height: 50px;
             background-color: #333;
@@ -56,42 +62,61 @@
             cursor: pointer;
             user-select: none;
         }
-        
-        /* Added styles for space bar and CTRL buttons */
-        .action-btn {
+
+        .center-btn {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background-color: #555;
+            border-radius: 50%;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .up { top: 0; left: 50%; transform: translate(-50%, 0); }
+        .down { bottom: 0; left: 50%; transform: translate(-50%, 0); }
+        .left { left: 0; top: 50%; transform: translate(0, -50%); }
+        .right { right: 0; top: 50%; transform: translate(0, -50%); }
+
+        #action-controls {
             position: absolute;
             bottom: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .action-btn {
             background-color: #333;
             color: white;
+            padding: 10px 20px;
+            margin-left: 10px;
+            border-radius: 25px;
             text-align: center;
             cursor: pointer;
             user-select: none;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
         }
 
-        #space-btn {
-            left: 10px;
-            width: 60px; 
-            height: 40px; /* A little more narrow */
-            line-height: 40px; /* Align text vertically */
-        }
-
-        #ctrl-btn {
-            left: 120px;
-            width: 50px;
+        .action-btn.space {
+            width: 100px;
             height: 50px;
-            line-height: 50px; /* Align text vertically */
-        }
-        #up-btn {
-            margin-bottom: 10px;
         }
 
-        #down-btn {
-            margin-top: 10px;
+        .action-btn.ctrl {
+            width: 80px;
+            height: 50px;
         }
 
-        #left-btn, #right-btn {
-            margin: 0 10px;
+        .action-btn:hover {
+            background-color: #555;
         }
+
     </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="script.js"></script> <!-- Link to the external JS file -->
@@ -103,17 +128,23 @@
             <div id="game-container" class="col">
                 <img id="cat" src="/images/cat.png" alt="cat">
                 <div id="score-board" class="score-board">Score: 0</div> <!-- Score board -->
-                <!-- Added space bar button -->
-                <div id="space-btn" class="action-btn">&#160;</div>
-                <!-- Added CTRL button -->
-                <div id="ctrl-btn" class="action-btn">CTRL</div>
-                <!-- Added controls for arrow buttons -->
-                <div id="controls">
-                    <div id="up-btn" class="arrow-btn">&#8593;</div>
-                    <div id="left-btn" class="arrow-btn">&#8592;</div>
-                    <div id="down-btn" class="arrow-btn">&#8595;</div>
-                    <div id="right-btn" class="arrow-btn">&#8594;</div>
+                <div id="action-controls">
+                    <!-- Added space bar button -->
+                    <div id="space-btn" class="action-btn space">Jump</div>
+                    <!-- Added CTRL button -->
+                    <div id="ctrl-btn" class="action-btn ctrl">Fire</div>
                 </div>
+
+                <div id="controls">
+                    <div id="joystick" class="joystick">
+                        <div id="up-btn" class="arrow-btn up">&#8593;</div>
+                        <div id="left-btn" class="arrow-btn left">&#8592;</div>
+                        <div id="center-btn" class="center-btn"></div>
+                        <div id="right-btn" class="arrow-btn right">&#8594;</div>
+                        <div id="down-btn" class="arrow-btn down">&#8595;</div>
+                    </div>
+                </div>
+               
             </div>
         </div>
     </div>
