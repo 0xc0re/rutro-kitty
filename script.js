@@ -1,203 +1,250 @@
-
 $(document).ready(function () {
-    const $cat = $('#cat');
-    let x = $('#game-container').width() / 2 - 32;
-    let y = $('#game-container').height() / 2 - 32;
-    let catSize = 64;
-    let speed = 4;
-    let keys = {};
-    let score = 0; // Initialize the score
-
-    // Time for bubbles to disappear (in milliseconds)
-    const bubbleDisappearTime = 4000; // 4 seconds
+    class Cat {
+        constructor() {
+            this.size = 64;
+            this.x = $('#game-container').width() / 2 - this.size / 2;
+            this.y = $('#game-container').height() / 2 - this.size / 2;
+            this.speed = 4;
+            this.catImage = ""; // Placeholder for the cat image URL
+            this.loadCatImages(); // Call the method to load cat images
+        }
     
-    // Function to update the score display
-    function updateScore() {
-        $('#score-board').text('Score: ' + score);
+        // Method to load cat images from a JSON file
+        loadCatImages() {
+            $.getJSON("/kitties.json", (data) => {
+                const randomCat = data[Math.floor(Math.random() * data.length)]; // Select a random cat from the list
+                this.catImage = randomCat.url; // Assign the URL to the catImage property
+                this.setCss(); // Call the setCss method to update the cat's appearance
+            });
+        }
+    
+        setCss() {
+            $('#cat').css({ left: this.x, top: this.y, width: this.size, height: this.size });
+            $('#cat').attr('src', this.catImage); // Change the src attribute to the new cat image
+        }
+        
+
+        grow() {
+            this.size += 2;
+            this.setCss();
+        }
+
+        move(keys) {
+            if (keys['ArrowUp']) this.y -= this.speed;
+            if (keys['ArrowDown']) this.y += this.speed;
+            if (keys['ArrowLeft']) this.x -= this.speed;
+            if (keys['ArrowRight']) this.x += this.speed;
+
+            this.x = Math.min(Math.max(this.x, 0), $('#game-container').width() - this.size);
+            this.y = Math.min(Math.max(this.y, 0), $('#game-container').height() - this.size);
+
+            this.setCss();
+        }
+
+        fireLaser() {
+            const $laser = $('<img src="/images/laserz.png" class="laser">');
+            $laser.css({
+                left: this.x + this.size,
+                top: this.y + this.size / 2,
+                position: 'absolute',
+            });
+            $('#game-container').append($laser);
+
+            $laser.animate({ left: $('#game-container').width() }, 1000, function () {
+                $laser.remove();
+            });
+        }
     }
 
-    // Function to generate a random color
+    class Bubble {
+        constructor() {
+            this.$element = $('<div class="bubble"></div>');
+            this.direction = { x: Math.random() * 2 - 1, y: Math.random() * 2 - 1 };
+            this.$element.data('direction', this.direction); // Store direction data in the bubble
+            this.setCss();
+            $('#game-container').append(this.$element);
+            this.randomDisappear();
+        }
+
+        setCss() {
+            this.$element.css({
+                left: Math.random() * ($('#game-container').width() - 32),
+                top: Math.random() * ($('#game-container').height() - 32),
+                backgroundColor: randomColor(),
+                opacity: Math.random() * 0.5 + 0.5,
+                width: 32,
+                height: 32,
+            });
+        }
+
+        move() {
+            let x = this.$element.position().left + this.direction.x;
+            let y = this.$element.position().top + this.direction.y;
+            this.$element.css({ left: x, top: y });
+        }
+
+        randomDisappear() {
+            const randomDisappearTime = Math.random() * 10000 + 1000;
+            setTimeout(() => {
+                this.$element.fadeOut(500, () => {
+                    this.$element.remove();
+                });
+            }, randomDisappearTime);
+        }
+    }
+
+    class Game {
+        constructor() {
+            this.score = 0;
+            this.cat = new Cat();
+            this.keys = {};
+            this.createBubblesIfNeeded();
+            this.updateScore();
+            setInterval(this.createBubblesIfNeeded.bind(this), this.getBubbleCreationInterval());
+            setInterval(this.moveBubbles.bind(this), 16);
+            setInterval(this.updatePosition.bind(this), 16);
+        }
+
+        updateScore() {
+            $('#score-board').text('Score: ' + this.score);
+        }
+
+        createBubblesIfNeeded() {
+            const maxBubbles = Math.min(20 + Math.floor(this.score / 20), 200);
+            while ($('.bubble').length < maxBubbles) {
+                new Bubble();
+            }
+        }
+
+        moveBubbles() {
+            $('.bubble').each(function() {
+                const $bubble = $(this);
+                let direction = $bubble.data('direction');
+                if (!direction) return; // Skip this iteration if direction data is missing
+        
+                let x = $bubble.position().left + direction.x;
+                let y = $bubble.position().top + direction.y;
+        
+                // Check for intersections with other bubbles
+                $('.bubble').not($bubble).each(function() {
+                    const $otherBubble = $(this);
+                    const otherX = $otherBubble.position().left;
+                    const otherY = $otherBubble.position().top;
+                    let otherDirection = $otherBubble.data('direction');
+                    if (!otherDirection) return; // Skip this iteration if direction data is missing
+        
+                    if (x < otherX + 32 && x + 32 > otherX && y < otherY + 32 && y + 32 > otherY) {
+                        // Reverse directions if bubbles intersect
+                        direction.x = -direction.x;
+                        direction.y = -direction.y;
+                        otherDirection.x = -otherDirection.x;
+                        otherDirection.y = -otherDirection.y;
+                        $bubble.data('direction', direction); // Set updated direction data
+                        $otherBubble.data('direction', otherDirection); // Set updated direction data
+                    }
+                });
+        
+                // Update bubble position
+                $bubble.css({ left: x, top: y });
+            });
+        }
+        
+        getBubbleCreationInterval() {
+            return Math.max(2000 - (this.score * 100), 500);
+        }
+
+        updatePosition() {
+            this.cat.move(this.keys);
+        
+            // Check for intersections with bubbles inside the updatePosition function
+            $('.bubble').each((_, bubbleElement) => {
+                const $bubble = $(bubbleElement);
+                const bubbleX = $bubble.position().left;
+                const bubbleY = $bubble.position().top;
+        
+                // Check for intersection with cat
+                if (this.cat.x < bubbleX + 32 && this.cat.x + this.cat.size > bubbleX &&
+                    this.cat.y < bubbleY + 32 && this.cat.y + this.cat.size > bubbleY) {
+        
+                    // Explosion animation sequence
+                    $bubble.animate({ width: 40, height: 40, opacity: 1 }, 100) // Expand slightly
+                        .animate({ width: 0, height: 0, opacity: 0 }, 200, () => { // Shrink to zero
+                            $bubble.remove(); // Remove bubble after animation
+                            this.cat.grow(); // Grow the cat
+                            this.score++; // Increment the score
+                            this.updateScore(); // Update the score display
+                        });
+                }
+        
+                // Check for intersection with lasers
+                $('.laser').toArray().some((laser) => {
+                    const $laser = $(laser);
+                    const laserX = $laser.position().left;
+                    const laserY = $laser.position().top;
+                    if (laserX < bubbleX + 32 && laserX + $laser.width() > bubbleX &&
+                        laserY < bubbleY + 32 && laserY + $laser.height() > bubbleY) {
+        
+                        // Similar explosion animation sequence as above
+                        $bubble.animate({ width: 40, height: 40, opacity: 1 }, 100)
+                            .animate({ width: 0, height: 0, opacity: 0 }, 200, () => {
+                                $bubble.remove();
+                                this.cat.grow();
+                                this.score++;
+                                this.updateScore();
+                            });
+                        return true; // Stops further processing if a laser intersects
+                    }
+                    return false;
+                });
+            });
+        }
+                
+    }
+
     function randomColor() {
         return '#' + Math.floor(Math.random() * 16777215).toString(16);
     }
 
-    // Function to create bubbles
-    function createBubble() {
-        const $bubble = $('<div class="bubble"></div>');
-        const direction = { x: Math.random() * 2 - 1, y: Math.random() * 2 - 1 }; // Random direction
-        $bubble.data('direction', direction); // Store direction data in the bubble
-        $bubble.css({
-            left: Math.random() * ($('#game-container').width() - 32),
-            top: Math.random() * ($('#game-container').height() - 32),
-            backgroundColor: randomColor(),
-            opacity: Math.random() * 0.5 + 0.5,
-            width: 32,
-            height: 32,
-        });
-        $('#game-container').append($bubble);
-
-        // Generate a random time for the bubble to disappear (between 1 and 5 seconds)
-        const randomDisappearTime = Math.random() * 10000 + 1000;
-
-        // Make the bubble disappear after the random amount of time
-        setTimeout(function () {
-            $bubble.fadeOut(500, function () {
-                $bubble.remove();
-                createBubblesIfNeeded();
-            });
-        }, randomDisappearTime);
-    }
-    
-    // Function to move and bounce bubbles
-    function moveBubbles() {
-        $('.bubble').each(function () {
-            const $bubble = $(this);
-            let direction = $bubble.data('direction');
-            let x = $bubble.position().left + direction.x;
-            let y = $bubble.position().top + direction.y;
-
-            // Check for intersections with other bubbles
-            $('.bubble').not($bubble).each(function () {
-                const $otherBubble = $(this);
-                const otherX = $otherBubble.position().left;
-                const otherY = $otherBubble.position().top;
-                const otherDirection = $otherBubble.data('direction');
-
-                if (x < otherX + 32 && x + 32 > otherX && y < otherY + 32 && y + 32 > otherY) {
-                    // Reverse directions if bubbles intersect
-                    direction.x = -direction.x;
-                    direction.y = -direction.y;
-                    otherDirection.x = -otherDirection.x;
-                    otherDirection.y = -otherDirection.y;
-                    $bubble.data('direction', direction);
-                    $otherBubble.data('direction', otherDirection);
-                }
-            });
-
-            // Update bubble position
-            $bubble.css({ left: x, top: y });
-        });
-    }
-
-
-    // Function to get bubble creation interval based on score
-     function getBubbleCreationInterval() {
-        return Math.max(2000 - (score * 100), 500); // Decrease interval as score increases, with a minimum of 500ms
-    }
-
-    // Function to create bubbles if needed
-    function createBubblesIfNeeded() {
-        const maxBubbles = Math.min(20 + Math.floor(score / 20), 200); // Increase total bubbles based on score
-        while ($('.bubble').length < maxBubbles) {
-            createBubble();
-        }
-    }
-
-    // Create initial bubbles
-    setInterval(createBubblesIfNeeded, getBubbleCreationInterval());
-    setInterval(moveBubbles, 16); // Move bubbles at 60 FPS
-
-    // Set initial cat position and size
-    $cat.css({ left: x, top: y, width: catSize, height: catSize });
-
-    function growCat() {
-        catSize += 2; // Increment cat size
-        $cat.css({ width: catSize, height: catSize }); // Update cat size
-        score++; // Increment the score
-        updateScore(); // Update the score display
-        createBubbleIfNeeded(); // Create new bubbles if needed
-    }
-
-    function fireLaser() {
-        const $laser = $('<img src="laserz.png" class="laser">');
-        $laser.css({
-            left: x + catSize, // Starting position from the cat's right edge
-            top: y + catSize / 2, // Centered vertically on the cat
-            position: 'absolute',
-        });
-        $('#game-container').append($laser);
-
-        // Animate the laser moving horizontally across the screen
-        $laser.animate({ left: $('#game-container').width() }, 1000, function () {
-            $laser.remove(); // Remove the laser when it's off-screen
-        });
-    }
-
-    function updatePosition() {
-        if (keys['ArrowUp']) y -= speed;
-        if (keys['ArrowDown']) y += speed;
-        if (keys['ArrowLeft']) x -= speed;
-        if (keys['ArrowRight']) x += speed;
-
-        x = Math.min(Math.max(x, 0), $('#game-container').width() - catSize);
-        y = Math.min(Math.max(y, 0), $('#game-container').height() - catSize);
-
-        $cat.css({ left: x, top: y });
-
-        // Check for intersections with bubbles inside the updatePosition function
-        $('.bubble').each(function () {
-            const $bubble = $(this);
-            const bubbleX = $bubble.position().left;
-            const bubbleY = $bubble.position().top;
-
-            // Check for intersection with cat or lasers
-            if ((x < bubbleX + 32 && x + catSize > bubbleX && y < bubbleY + 32 && y + catSize > bubbleY) ||
-                $('.laser').toArray().some(function (laser) {
-                    const $laser = $(laser);
-                    const laserX = $laser.position().left;
-                    const laserY = $laser.position().top;
-                    return laserX < bubbleX + 32 && laserX + $laser.width() > bubbleX && laserY < bubbleY + 32 && laserY + $laser.height() > bubbleY;
-                })) {
-                
-                // Explosion animation sequence
-                $bubble.animate({ width: 40, height: 40, opacity: 1 }, 100) // Expand slightly
-                    .animate({ width: 0, height: 0, opacity: 0 }, 200, function () { // Shrink to zero
-                        $bubble.remove(); // Remove bubble after animation
-                        growCat(); // Grow the cat and increment the score
-                    });
-            }
-        });
-    }
+    const game = new Game();
 
     $(document).keydown(function (event) {
-        keys[event.key] = true;
+        game.keys[event.key] = true;
 
         if (event.key === ' ') {
-            $cat.animate({ top: y - 64 }, 300, function () {
-                $cat.animate({ top: y }, 300);
+            $('#cat').animate({ top: game.cat.y - 64 }, 300, function () {
+                $('#cat').animate({ top: game.cat.y }, 300);
             });
         }
 
         if (event.ctrlKey) {
-            fireLaser(); // Fire the laser when the CTRL key is pressed
+            game.cat.fireLaser();
         }
     });
 
     $(document).keyup(function (event) {
-        keys[event.key] = false;
+        game.keys[event.key] = false;
     });
 
-    setInterval(updatePosition, 16); // Update position at 60 FPS
-    
-    // Added event listeners for space bar and CTRL buttons
+    // Touch control for space button (jump)
     $('#space-btn').on('touchstart mousedown', function() {
-        $cat.animate({ top: y - 64 }, 300, function () {
-            $cat.animate({ top: y }, 300);
+        $('#cat').animate({ top: game.cat.y - 64 }, 300, function () {
+            $('#cat').animate({ top: game.cat.y }, 300);
         });
     });
 
+    // Touch control for CTRL button (fire laser)
     $('#ctrl-btn').on('touchstart mousedown', function() {
-        fireLaser(); // Fire the laser
+        game.cat.fireLaser();
     });
 
-    // Added event listeners for on-screen buttons
-    $('#up-btn').on('touchstart mousedown', function() { keys['ArrowUp'] = true; });
-    $('#up-btn').on('touchend mouseup', function() { keys['ArrowUp'] = false; });
-    $('#down-btn').on('touchstart mousedown', function() { keys['ArrowDown'] = true; });
-    $('#down-btn').on('touchend mouseup', function() { keys['ArrowDown'] = false; });
-    $('#left-btn').on('touchstart mousedown', function() { keys['ArrowLeft'] = true; });
-    $('#left-btn').on('touchend mouseup', function() { keys['ArrowLeft'] = false; });
-    $('#right-btn').on('touchstart mousedown', function() { keys['ArrowRight'] = true; });
-    $('#right-btn').on('touchend mouseup', function() { keys['ArrowRight'] = false; });
+    // Touch controls for arrow buttons (movement)
+    $('#up-btn').on('touchstart mousedown', function() { game.keys['ArrowUp'] = true; });
+    $('#up-btn').on('touchend mouseup', function() { game.keys['ArrowUp'] = false; });
+    $('#down-btn').on('touchstart mousedown', function() { game.keys['ArrowDown'] = true; });
+    $('#down-btn').on('touchend mouseup', function() { game.keys['ArrowDown'] = false; });
+    $('#left-btn').on('touchstart mousedown', function() { game.keys['ArrowLeft'] = true; });
+    $('#left-btn').on('touchend mouseup', function() { game.keys['ArrowLeft'] = false; });
+    $('#right-btn').on('touchstart mousedown', function() { game.keys['ArrowRight'] = true; });
+    $('#right-btn').on('touchend mouseup', function() { game.keys['ArrowRight'] = false; });
 
 });
