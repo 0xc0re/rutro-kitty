@@ -178,5 +178,26 @@ $(document).ready(function () {
     });
 
     setInterval(updatePosition, 16); // Update position at 60 FPS
+    
+    // Added event listeners for space bar and CTRL buttons
+    $('#space-btn').on('touchstart mousedown', function() {
+        $cat.animate({ top: y - 64 }, 300, function () {
+            $cat.animate({ top: y }, 300);
+        });
+    });
+
+    $('#ctrl-btn').on('touchstart mousedown', function() {
+        fireLaser(); // Fire the laser
+    });
+
+    // Added event listeners for on-screen buttons
+    $('#up-btn').on('touchstart mousedown', function() { keys['ArrowUp'] = true; });
+    $('#up-btn').on('touchend mouseup', function() { keys['ArrowUp'] = false; });
+    $('#down-btn').on('touchstart mousedown', function() { keys['ArrowDown'] = true; });
+    $('#down-btn').on('touchend mouseup', function() { keys['ArrowDown'] = false; });
+    $('#left-btn').on('touchstart mousedown', function() { keys['ArrowLeft'] = true; });
+    $('#left-btn').on('touchend mouseup', function() { keys['ArrowLeft'] = false; });
+    $('#right-btn').on('touchstart mousedown', function() { keys['ArrowRight'] = true; });
+    $('#right-btn').on('touchend mouseup', function() { keys['ArrowRight'] = false; });
 
 });

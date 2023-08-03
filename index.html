@@ -13,11 +13,13 @@
             overflow: hidden;
             background-color: #f0f0f0;
         }
+
         #cat {
             width: 64px;
             height: 64px;
             position: absolute;
         }
+
         .bubble {
             width: 32px;
             height: 32px;
@@ -32,19 +34,89 @@
             font-size: 20px;
             color: #333;
         }
+
+        /* Added styles for arrow buttons */
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+        }
+
+        .arrow-btn {
+            width: 50px;
+            height: 50px;
+            background-color: #333;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            user-select: none;
+        }
         
+        /* Added styles for space bar and CTRL buttons */
+        .action-btn {
+            position: absolute;
+            bottom: 20px;
+            background-color: #333;
+            color: white;
+            text-align: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        #space-btn {
+            left: 10px;
+            width: 100px; /* Twice as wide as the arrow buttons */
+            height: 40px; /* A little more narrow */
+            line-height: 40px; /* Align text vertically */
+        }
+
+        #ctrl-btn {
+            left: 120px;
+            width: 50px;
+            height: 50px;
+            line-height: 50px; /* Align text vertically */
+        }
+        #up-btn {
+            margin-bottom: 10px;
+        }
+
+        #down-btn {
+            margin-top: 10px;
+        }
+
+        #left-btn, #right-btn {
+            margin: 0 10px;
+        }
     </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="script.js"></script> <!-- Link to the external JS file -->
 </head>
+
 <body>
     <div class="container-fluid h-100">
         <div class="row h-100">
             <div id="game-container" class="col">
                 <img id="cat" src="cat.png" alt="cat">
                 <div id="score-board" class="score-board">Score: 0</div> <!-- Score board -->
+                <!-- Added space bar button -->
+                <div id="space-btn" class="action-btn">&#160;</div>
+                <!-- Added CTRL button -->
+                <div id="ctrl-btn" class="action-btn">CTRL</div>
+                <!-- Added controls for arrow buttons -->
+                <div id="controls">
+                    <div id="up-btn" class="arrow-btn">&#8593;</div>
+                    <div id="left-btn" class="arrow-btn">&#8592;</div>
+                    <div id="down-btn" class="arrow-btn">&#8595;</div>
+                    <div id="right-btn" class="arrow-btn">&#8594;</div>
+                </div>
             </div>
         </div>
     </div>
 </body>
+
 </html>
