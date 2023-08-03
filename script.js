@@ -115,8 +115,37 @@ $(document).ready(function () {
             setInterval(this.createBubblesIfNeeded.bind(this), this.getBubbleCreationInterval());
             setInterval(this.moveBubbles.bind(this), 16);
             setInterval(this.updatePosition.bind(this), 16);
+            // Adding event listeners for joystick controls
+            this.addControlEvents('up-btn', 'ArrowUp');
+            this.addControlEvents('down-btn', 'ArrowDown');
+            this.addControlEvents('left-btn', 'ArrowLeft');
+            this.addControlEvents('right-btn', 'ArrowRight');
+
+            // Adding event listeners for action controls
+            this.addControlEvents('space-btn', 'Space');
+            this.addControlEvents('ctrl-btn', 'Control');
+        }
+        // Handling control events
+        handleControl(key, value) {
+            this.keys[key] = value;
+            if (key === 'Control') this.cat.fireLaser();
         }
 
+        // Resetting control state on mouseup
+        resetControls() {
+            this.keys = {};
+        }
+
+        addControlEvents(elementId, key) {
+            const element = document.getElementById(elementId);
+            element.addEventListener('mousedown', (e) => { e.preventDefault(); this.handleControl(key, true); });
+            element.addEventListener('touchstart', (e) => { e.preventDefault(); this.handleControl(key, true); });
+            element.addEventListener('mouseup', (e) => { e.preventDefault(); this.resetControls(); });
+            element.addEventListener('touchend', (e) => { e.preventDefault(); this.resetControls(); });
+            element.addEventListener('mouseleave', (e) => { e.preventDefault(); this.resetControls(); });
+            element.addEventListener('touchcancel', (e) => { e.preventDefault(); this.resetControls(); });
+        }
+        
         updateScore() {
             $('#score-board').text('Score: ' + this.score);
         }
