@@ -85,6 +85,7 @@ $(document).ready(function () {
     class Bubble {
         constructor(cat) {
             this.cat = cat;
+            this.minSize = Math.floor(Math.random() * (16 - 8 + 1)) + 8;
             this.$element = $('<div class="bubble"></div>');
             this.direction = { x: Math.random() * 2 - 1, y: Math.random() * 2 - 1 };
             this.$element.data('direction', this.direction); // Store direction data in the bubble
@@ -99,8 +100,8 @@ $(document).ready(function () {
                 top: Math.random() * ($('#game-container').height() - 32),
                 backgroundColor: randomColor(),
                 opacity: Math.random() * 0.5 + 0.5,
-                width: 32,
-                height: 32,
+                width: this.minSize,
+                height: this.minSize,
             });
         }
 
