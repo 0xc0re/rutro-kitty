@@ -1,11 +1,11 @@
 $(document).ready(function () {
     class Cat {
         constructor() {            
-            this.size = 64;
-            this.minSize = 32; // Minimum size for the cat
-            this.maxSize = 512; // Maximum size for the cat
-            this.shrinkFactor = 0; // 2% shrink factor
-            this.growFactor = 0; // 10% growth factor
+            this.size = 32;
+            this.minSize = 16; // Minimum size for the cat
+            this.maxSize = 256; // Maximum size for the cat
+            this.shrinkFactor = 0.01; // 2% shrink factor
+            this.growFactor = 0.01; // 10% growth factor
             this.x = $('#game-container').width() / 2 - this.size / 2;
             this.y = $('#game-container').height() / 2 - this.size / 2;
             this.speed = 4;
@@ -145,7 +145,7 @@ $(document).ready(function () {
             element.addEventListener('mouseleave', (e) => { e.preventDefault(); this.resetControls(); });
             element.addEventListener('touchcancel', (e) => { e.preventDefault(); this.resetControls(); });
         }
-        
+
         updateScore() {
             $('#score-board').text('Score: ' + this.score);
         }
@@ -252,7 +252,7 @@ $(document).ready(function () {
         game.keys[event.key] = true;
 
         if (event.key === ' ') {
-            $('#cat').animate({ top: game.cat.y - 64 }, 300, function () {
+            $('#cat').animate({ top: game.cat.y - game.cat.size }, 300, function () {
                 $('#cat').animate({ top: game.cat.y }, 300);
             });
         }
@@ -268,7 +268,7 @@ $(document).ready(function () {
 
     // Touch control for space button (jump)
     $('#space-btn').on('touchstart mousedown', function() {
-        $('#cat').animate({ top: game.cat.y - 64 }, 300, function () {
+        $('#cat').animate({ top: game.cat.y - game.cat.size }, 300, function () {
             $('#cat').animate({ top: game.cat.y }, 300);
         });
     });
