@@ -3,13 +3,13 @@ $(document).ready(function () {
         constructor() {
             this.lastFired = 0;
             this.size = 24;
-            this.minSize = 4; // Minimum size for the cat
-            this.maxSize = 32; // Maximum size for the cat
+            this.minSize = 6; // Minimum size for the cat
+            this.maxSize = 48; // Maximum size for the cat
             this.shrinkFactor = 0.01;
             this.growFactor = 0.01;
             this.x = $('#game-container').width() / 2 - this.size / 2;
             this.y = $('#game-container').height() / 2 - this.size / 2;
-            this.speed = 4;
+            this.speed = 5;
             this.catImage = "images/cat1.png"; // Placeholder for the cat image URL
             this.loadCatImages(); // Call the method to load cat images
             this.targetX = null; // Target x-coordinate for movement
@@ -135,7 +135,7 @@ $(document).ready(function () {
         }
 
         move() {
-            const attractionFactor = 0.01; // You can adjust this value
+            const attractionFactor = 0.011; // You can adjust this value
         
             // Calculate the direction towards the cat
             const dx = this.cat.x + this.cat.size / 2 - (this.$element.position().left + 16);
