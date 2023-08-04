@@ -184,7 +184,7 @@ $(document).ready(function () {
 
     class Game {
         constructor() {
-            this.minBubbles = 30;
+            this.minBubbles = 25;
             this.score = 0;
             this.cat = new Cat();
             this.keys = {};
@@ -212,8 +212,8 @@ $(document).ready(function () {
             });
 
             // Adding event listeners for action controls
-            this.addControlEvents('space-btn', 'Space');
-            this.addControlEvents('ctrl-btn', 'Control');
+            //this.addControlEvents('space-btn', 'Space');
+            //this.addControlEvents('ctrl-btn', 'Control');
 
            // Handle touchstart or mousedown event
         $('#game-container').on('touchstart mousedown', (e) => {
