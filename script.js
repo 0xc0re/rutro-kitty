@@ -4,15 +4,15 @@ $(document).ready(function () {
             this.lastFired = 0;
             this.size = 16;
             this.minSize = 8; // Minimum size for the cat
-            this.maxSize = 256; // Maximum size for the cat
-            this.shrinkFactor = 0.05;
-            this.growFactor = 0.05;
+            this.maxSize = 32; // Maximum size for the cat
+            this.shrinkFactor = 0.01;
+            this.growFactor = 0.01;
             this.x = $('#game-container').width() / 2 - this.size / 2;
             this.y = $('#game-container').height() / 2 - this.size / 2;
             this.speed = 4;
             this.catImage = "images/cat1.png"; // Placeholder for the cat image URL
             this.loadCatImages(); // Call the method to load cat images
-        }8878
+        }
 
         // Method to load cat images from a JSON file
         loadCatImages() {
