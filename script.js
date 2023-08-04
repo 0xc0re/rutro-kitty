@@ -215,14 +215,17 @@ $(document).ready(function () {
             this.addControlEvents('space-btn', 'Space');
             this.addControlEvents('ctrl-btn', 'Control');
 
-            // Handle touchstart or mousedown event
-            $('#game-container').on('touchstart mousedown', (e) => {
-                this.updateTargetPosition(e);
-            });
-            // Handle touchmove event to update target position
-            $('#game-container').on('touchmove', (e) => {
-                this.updateTargetPosition(e);
-            });
+           // Handle touchstart or mousedown event
+        $('#game-container').on('touchstart mousedown', (e) => {
+            e.preventDefault(); // Prevent default behavior
+            this.updateTargetPosition(e);
+        });
+
+        // Handle touchmove event to update target position
+        $('#game-container').on('touchmove', (e) => {
+            e.preventDefault(); // Prevent default behavior
+            this.updateTargetPosition(e);
+        });
 
             // Handle touchend or mouseup event to stop movement
             $('#game-container').on('touchend mouseup', () => {
