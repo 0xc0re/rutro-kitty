@@ -1,6 +1,8 @@
 $(document).ready(function () {
     class Cat {
         constructor() {
+            this.laserDirectionX = 1; // Default direction
+            this.laserDirectionY = 0; // Default direction
             this.lastFired = 0;
             this.size = 24;
             this.minSize = 8; // Minimum size for the cat
@@ -93,19 +95,23 @@ $(document).ready(function () {
         fireLaser() {
             const now = Date.now();
             if (now - this.lastFired < this.getCooldownTime()) return;
-
+        
             this.lastFired = now;
             const $laser = $('<img src="/images/laserz.png" class="laser">');
             $laser.css({
-                left: this.x + this.size,
+                left: this.x + this.size / 2,
                 top: this.y + this.size / 2,
-                width: 60, // Adjust laser width relative to cat's size
-                height: this.size / 2, // Adjust laser height relative to cat's size
+                width: 10, // Adjust laser width
+                height: 10, // Adjust laser height
                 position: 'absolute',
             });
             $('#game-container').append($laser);
-
-            $laser.animate({ left: $('#game-container').width() }, 1000, function () {
+        
+            // Animate laser in the direction of the last touch
+            $laser.animate({
+                left: this.x + this.size / 2 + this.laserDirectionX * $('#game-container').width(),
+                top: this.y + this.size / 2 + this.laserDirectionY * $('#game-container').height(),
+            }, 1000, function () {
                 $laser.remove();
             });
         }
@@ -244,9 +250,17 @@ $(document).ready(function () {
                 targetX = e.clientX - $('#game-container').offset().left;
                 targetY = e.clientY - $('#game-container').offset().top;
             }
+            
+            // Calculate the direction of the laser
+            const dx = targetX - this.cat.x - this.cat.size / 2;
+            const dy = targetY - this.cat.y - this.cat.size / 2;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            this.cat.laserDirectionX = dx / distance;
+            this.cat.laserDirectionY = dy / distance;
+        
             this.cat.moveTo(targetX, targetY); // Move the cat to the touched position
         }
-
+        
         animateGame() {
             this.cat.updateMovement(); // Update the cat's movement
             this.moveBubbles(); // Move the bubbles
