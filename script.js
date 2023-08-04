@@ -2,8 +2,8 @@ $(document).ready(function () {
     class Cat {
         constructor() {
             this.lastFired = 0;
-            this.size = 16;
-            this.minSize = 8; // Minimum size for the cat
+            this.size = 24;
+            this.minSize = 4; // Minimum size for the cat
             this.maxSize = 32; // Maximum size for the cat
             this.shrinkFactor = 0.01;
             this.growFactor = 0.01;
@@ -12,7 +12,37 @@ $(document).ready(function () {
             this.speed = 4;
             this.catImage = "images/cat1.png"; // Placeholder for the cat image URL
             this.loadCatImages(); // Call the method to load cat images
+            this.targetX = null; // Target x-coordinate for movement
+            this.targetY = null; // Target y-coordinate for movement
         }
+
+        moveTo(targetX, targetY) {
+            this.targetX = targetX;
+            this.targetY = targetY;
+        }
+
+        updateMovement() {
+            if (this.targetX === null || this.targetY === null) return; // Return if no target
+
+            const dx = this.targetX - this.x;
+            const dy = this.targetY - this.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < this.speed) {
+                this.x = this.targetX;
+                this.y = this.targetY;
+                this.targetX = null; // Reset target
+                this.targetY = null; // Reset target
+            } else {
+                const directionX = dx / distance;
+                const directionY = dy / distance;
+                this.x += directionX * this.speed;
+                this.y += directionY * this.speed;
+            }
+
+            $('#cat').css({ left: this.x, top: this.y });
+        }
+
 
         // Method to load cat images from a JSON file
         loadCatImages() {
@@ -31,7 +61,7 @@ $(document).ready(function () {
         shrink() {
             this.size = Math.max(this.size * (1 - this.shrinkFactor), this.minSize);
             this.setCss();
-    
+
             // If the cat's size is the minimum, game over
             if (this.size === this.minSize) {
                 game.gameOver();
@@ -54,12 +84,12 @@ $(document).ready(function () {
 
             $('#cat').css({ left: this.x, top: this.y }); // Use .css() instead of .animate()
         }
-        
+
         getCooldownTime() {
             // Cooldown time increases linearly with the cat's size
             return 1 + (this.size - this.minSize); // Minimum cooldown is 500ms, increases with size
         }
-        
+
         fireLaser() {
             const now = Date.now();
             if (now - this.lastFired < this.getCooldownTime()) return;
@@ -74,12 +104,12 @@ $(document).ready(function () {
                 position: 'absolute',
             });
             $('#game-container').append($laser);
-        
+
             $laser.animate({ left: $('#game-container').width() }, 1000, function () {
                 $laser.remove();
             });
         }
-        
+
     }
 
     class Bubble {
@@ -88,12 +118,11 @@ $(document).ready(function () {
             this.minSize = Math.floor(Math.random() * (16 - 8 + 1)) + 8;
             this.$element = $('<div class="bubble"></div>');
             this.direction = { x: Math.random() * 2 - 1, y: Math.random() * 2 - 1 };
-            this.$element.data('direction', this.direction); // Store direction data in the bubble
             this.setCss();
             $('#game-container').append(this.$element);
             this.randomDisappear();
         }
-
+        
         setCss() {
             this.$element.css({
                 left: Math.random() * ($('#game-container').width() - 32),
@@ -106,8 +135,39 @@ $(document).ready(function () {
         }
 
         move() {
+            const attractionFactor = 0.01; // You can adjust this value
+        
+            // Calculate the direction towards the cat
+            const dx = this.cat.x + this.cat.size / 2 - (this.$element.position().left + 16);
+            const dy = this.cat.y + this.cat.size / 2 - (this.$element.position().top + 16);
+            const distance = Math.sqrt(dx * dx + dy * dy);
+        
+            // Calculate attraction effect
+            const attractionX = dx / distance * attractionFactor;
+            const attractionY = dy / distance * attractionFactor;
+        
+            // Add attraction effect to existing direction
+            this.direction.x += attractionX;
+            this.direction.y += attractionY;
+        
+            // Update the direction for movement
             let x = this.$element.position().left + this.direction.x;
             let y = this.$element.position().top + this.direction.y;
+        
+            // Check if bubble is at the edge of the container
+            // Reverse direction if bubble is at the edge
+            const containerWidth = $('#game-container').width() - this.minSize;
+            const containerHeight = $('#game-container').height() - this.minSize;
+            if (x <= 0 || x >= containerWidth) {
+                this.direction.x = -this.direction.x;
+                x = Math.max(0, Math.min(x, containerWidth)); // Bound x within the container
+            }
+            if (y <= 0 || y >= containerHeight) {
+                this.direction.y = -this.direction.y;
+                y = Math.max(0, Math.min(y, containerHeight)); // Bound y within the container
+            }
+        
+            // Update bubble position
             this.$element.css({ left: x, top: y });
         }
 
@@ -115,7 +175,7 @@ $(document).ready(function () {
             const randomDisappearTime = Math.random() * 20000 + 1000;
             setTimeout(() => {
                 this.$element.animate({ width: 0, height: 0, opacity: 0 }, 500, () => {
-                    this.$element.remove();                    
+                    this.$element.remove();
                 });
             }, randomDisappearTime);
         }
@@ -133,38 +193,79 @@ $(document).ready(function () {
             setInterval(this.createBubblesIfNeeded.bind(this), this.getBubbleCreationInterval());
             this.animateGame = this.animateGame.bind(this);
             requestAnimationFrame(this.animateGame);
-            // Adding event listeners for joystick controls
-            this.addControlEvents('up-btn', 'ArrowUp');
-            this.addControlEvents('down-btn', 'ArrowDown');
-            this.addControlEvents('left-btn', 'ArrowLeft');
-            this.addControlEvents('right-btn', 'ArrowRight');
+
+            // Handle double click event for desktop
+            $('#game-container').on('dblclick', () => {
+                this.cat.fireLaser();
+            });
+
+            // Handle double tap event for touch devices
+            let lastTapTime = 0;
+            $('#game-container').on('touchend', (e) => {
+                const currentTime = new Date().getTime();
+                const tapLength = currentTime - lastTapTime;
+                lastTapTime = currentTime;
+                if (tapLength < 500 && tapLength > 0) { // Adjust time threshold as needed
+                    e.preventDefault();
+                    this.cat.fireLaser();
+                }
+            });
 
             // Adding event listeners for action controls
             this.addControlEvents('space-btn', 'Space');
             this.addControlEvents('ctrl-btn', 'Control');
+
+            // Handle touchstart or mousedown event
+            $('#game-container').on('touchstart mousedown', (e) => {
+                this.updateTargetPosition(e);
+            });
+            // Handle touchmove event to update target position
+            $('#game-container').on('touchmove', (e) => {
+                this.updateTargetPosition(e);
+            });
+
+            // Handle touchend or mouseup event to stop movement
+            $('#game-container').on('touchend mouseup', () => {
+                this.cat.targetX = null; // Reset target
+                this.cat.targetY = null; // Reset target
+            });
         }
-        
+        // Method to update target position based on event
+        updateTargetPosition(e) {
+            let targetX, targetY;
+            if (e.type === 'touchstart' || e.type === 'touchmove') {
+                const touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
+                targetX = touch.clientX - $('#game-container').offset().left;
+                targetY = touch.clientY - $('#game-container').offset().top;
+            } else { // Handle mouse events
+                targetX = e.clientX - $('#game-container').offset().left;
+                targetY = e.clientY - $('#game-container').offset().top;
+            }
+            this.cat.moveTo(targetX, targetY); // Move the cat to the touched position
+        }
+
+        animateGame() {
+            this.cat.updateMovement(); // Update the cat's movement
+            this.moveBubbles(); // Move the bubbles
+            this.updatePosition(); // Check for intersections and update positions
+            requestAnimationFrame(this.animateGame); // Continue the game loop
+        }
+
         gameOver() {
             // Stop all animations
             $('.bubble').stop();
             $('.laser').stop();
-        
+
             // Remove all bubbles and lasers
             $('.bubble').remove();
             $('.laser').remove();
-        
+
             // Stop the game loop
             cancelAnimationFrame(this.animateGame);
-        
+
             // Show the game over modal
             $('#game-over-modal').fadeIn();
         }
-
-        animateGame() {
-            this.moveBubbles();
-            this.updatePosition();
-            requestAnimationFrame(this.animateGame);
-        }       
 
         // Handling control events
         handleControl(key, value) {
@@ -194,54 +295,17 @@ $(document).ready(function () {
         createBubblesIfNeeded() {
             const maxBubbles = Math.min(this.minBubbles + Math.floor(this.score / this.minBubbles), 200);
             while ($('.bubble').length < maxBubbles) {
-                new Bubble(this.cat); // Pass the cat object to the Bubble constructor
+                const bubble = new Bubble(this.cat);
+                $(bubble.$element).data('instance', bubble); // Store the Bubble instance
             }
         }
 
         moveBubbles() {
-            $('.bubble').each(function () {
-                const $bubble = $(this);
-                let direction = $bubble.data('direction');
-                if (!direction) return; // Skip this iteration if direction data is missing
-
-                let x = $bubble.position().left + direction.x;
-                let y = $bubble.position().top + direction.y;
-
-                // Check if bubble is at the edge of the container
-                // Reverse direction if bubble is at the edge
-                const containerWidth = $('#game-container').width();
-                const containerHeight = $('#game-container').height();
-                if (x <= 0 || x + 32 >= containerWidth) {
-                    direction.x = -direction.x;
-                }
-                if (y <= 0 || y + 32 >= containerHeight) {
-                    direction.y = -direction.y;
-                }
-
-                // Check for intersections with other bubbles
-                $('.bubble').not($bubble).each(function () {
-                    const $otherBubble = $(this);
-                    const otherX = $otherBubble.position().left;
-                    const otherY = $otherBubble.position().top;
-                    let otherDirection = $otherBubble.data('direction');
-                    if (!otherDirection) return; // Skip this iteration if direction data is missing
-
-                    if (x < otherX + 32 && x + 32 > otherX && y < otherY + 32 && y + 32 > otherY) {
-                        // Reverse directions if bubbles intersect
-                        direction.x = -direction.x;
-                        direction.y = -direction.y;
-                        otherDirection.x = -otherDirection.x;
-                        otherDirection.y = -otherDirection.y;
-                        $bubble.data('direction', direction); // Set updated direction data
-                        $otherBubble.data('direction', otherDirection); // Set updated direction data
-                    }
-                });
-
-                // Update bubble position
-                $bubble.css({ left: x, top: y });
+            $('.bubble').each((_, bubbleElement) => {
+                const bubbleInstance = $(bubbleElement).data('instance'); // Retrieve the Bubble instance
+                if (bubbleInstance) bubbleInstance.move(); // Call the move method
             });
         }
-
 
         getBubbleCreationInterval() {
             return Math.max(2000 - (this.score * 100), 500);
@@ -277,14 +341,14 @@ $(document).ready(function () {
                 });
             });
         }
-        
+
         popBubble($bubble) {
             // Define an array of effects
             const effects = ["explode", "puff", "clip", "shake", "bounce", "slide"];
-        
+
             // Choose a random effect from the array
             const randomEffect = effects[Math.floor(Math.random() * effects.length)];
-        
+
             // Apply the chosen effect
             $bubble.effect(randomEffect, { pieces: 8 }, 250, () => {
                 // Remove bubble after animation
@@ -293,8 +357,8 @@ $(document).ready(function () {
                 this.updateScore(); // Update the score display
             });
         }
-        
-        
+
+
     }
 
     function randomColor() {
@@ -333,18 +397,8 @@ $(document).ready(function () {
         game.cat.fireLaser();
     });
 
-    // Touch controls for arrow buttons (movement)
-    $('#up-btn').on('touchstart mousedown', function () { game.keys['ArrowUp'] = true; });
-    $('#up-btn').on('touchend mouseup', function () { game.keys['ArrowUp'] = false; });
-    $('#down-btn').on('touchstart mousedown', function () { game.keys['ArrowDown'] = true; });
-    $('#down-btn').on('touchend mouseup', function () { game.keys['ArrowDown'] = false; });
-    $('#left-btn').on('touchstart mousedown', function () { game.keys['ArrowLeft'] = true; });
-    $('#left-btn').on('touchend mouseup', function () { game.keys['ArrowLeft'] = false; });
-    $('#right-btn').on('touchstart mousedown', function () { game.keys['ArrowRight'] = true; });
-    $('#right-btn').on('touchend mouseup', function () { game.keys['ArrowRight'] = false; });
-
-    $('#restart-btn').click(function() {
+    $('#restart-btn').click(function () {
         location.reload(); // Reload the page to restart the game
     });
-    
+
 });
