@@ -3,7 +3,7 @@ $(document).ready(function () {
         constructor() {
             this.lastFired = 0;
             this.size = 24;
-            this.minSize = 6; // Minimum size for the cat
+            this.minSize = 8; // Minimum size for the cat
             this.maxSize = 48; // Maximum size for the cat
             this.shrinkFactor = 0.01;
             this.growFactor = 0.01;
@@ -184,7 +184,7 @@ $(document).ready(function () {
 
     class Game {
         constructor() {
-            this.minBubbles = 20;
+            this.minBubbles = 30;
             this.score = 0;
             this.cat = new Cat();
             this.keys = {};
