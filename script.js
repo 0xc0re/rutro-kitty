@@ -6,9 +6,9 @@ $(document).ready(function () {
             this.lastFired = 0;
             this.size = 24;
             this.minSize = 12; // Minimum size for the cat
-            this.maxSize = 60; // Maximum size for the cat
-            this.shrinkFactor = 0.01;
-            this.growFactor = 0.01;
+            this.maxSize = 48; // Maximum size for the cat
+            this.shrinkFactor = 0.015;
+            this.growFactor = 0.015;
             this.x = $('#game-container').width() / 2 - this.size / 2;
             this.y = $('#game-container').height() / 2 - this.size / 2;
             this.speed = 5;
@@ -89,7 +89,7 @@ $(document).ready(function () {
 
         getCooldownTime() {
             // Cooldown time increases linearly with the cat's size
-            return 0;// + (this.size - this.minSize); // Minimum cooldown is 500ms, increases with size
+            return 1 + (this.size - this.minSize); // Minimum cooldown is 500ms, increases with size
         }
 
         fireLaser() {
@@ -101,8 +101,8 @@ $(document).ready(function () {
             $laser.css({
                 left: this.x + this.size / 2,
                 top: this.y + this.size / 2,
-                width: 60, // Adjust laser width
-                height: 30, // Adjust laser height
+                width: 140, // Adjust laser width
+                height: 31, // Adjust laser height
                 position: 'absolute',
             });
             $('#game-container').append($laser);
@@ -121,12 +121,12 @@ $(document).ready(function () {
     class Bubble {
         constructor(cat) {
             this.cat = cat;
-            this.minSize = Math.floor(Math.random() * (16 - 8 + 1)) + 8;
+            this.minSize = Math.floor(Math.random() * (this.cat.minSize * 1.2 - this.cat.minSize)) + this.cat.minSize;
             this.$element = $('<div class="bubble"></div>');
             this.direction = { x: Math.random() * 2 - 1, y: Math.random() * 2 - 1 };
             this.setCss();
             $('#game-container').append(this.$element);
-            this.randomDisappear();
+            //this.randomDisappear();
         }
         
         setCss() {
@@ -141,7 +141,7 @@ $(document).ready(function () {
         }
 
         move() {
-            const attractionFactor = 0.011; // You can adjust this value
+            const attractionFactor = 0.008; // You can adjust this value
         
             // Calculate the direction towards the cat
             const dx = this.cat.x + this.cat.size / 2 - (this.$element.position().left + 16);
@@ -367,7 +367,7 @@ $(document).ready(function () {
             const randomEffect = effects[Math.floor(Math.random() * effects.length)];
 
             // Apply the chosen effect
-            $bubble.effect(randomEffect, { pieces: 8 }, 250, () => {
+            $bubble.effect(randomEffect, { pieces: 4 }, 150, () => {
                 // Remove bubble after animation
                 $bubble.remove();
                 this.score++; // Increment the score

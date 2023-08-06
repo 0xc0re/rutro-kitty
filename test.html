@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rutro Kitty!</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        #game-container {
+            width: 100%;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+            background-color: #f0f0f0;
+        }
+
+        #score-board {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 20px;
+            color: #333;
+        }
+
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .action-btn {
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            margin-left: 10px;
+            border-radius: 25px;
+            text-align: center;
+            cursor: pointer;
+            user-select: none;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+        }
+
+        .action-btn:hover {
+            background-color: #555;
+        }
+        #action-controls {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+}
+#game-canvas {
+    width: 100%;
+    height: 100%;
+}
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="test.js"></script> <!-- Link to the external JS file -->
+
+</head>
+
+<body>
+    <div class="container-fluid h-100">
+        <div class="row h-100">
+            <div id="game-container" class="col">
+                <canvas id="game-canvas"></canvas> <!-- Add this line -->
+                <div id="score-board" class="score-board">Score: 0</div> <!-- Score board -->
+                <div id="action-controls">
+                    <!-- Added space bar button -->
+                    <div id="space-btn" class="action-btn space">Jump</div>
+                    <!-- Added CTRL button -->
+                    <div id="ctrl-btn" class="action-btn ctrl">Fire</div>
+                </div>
+            
+                <div id="controls">
+                    <div id="joystick" class="joystick">
+                        <div id="up-btn" class="arrow-btn up">&#8593;</div>
+                        <div id="left-btn" class="arrow-btn left">&#8592;</div>
+                        <div id="center-btn" class="center-btn"></div>
+                        <div id="right-btn" class="arrow-btn right">&#8594;</div>
+                        <div id="down-btn" class="arrow-btn down">&#8595;</div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</body>
+
+</html>
