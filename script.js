@@ -5,8 +5,8 @@ $(document).ready(function () {
             this.laserDirectionY = 0; // Default direction
             this.lastFired = 0;
             this.size = 24;
-            this.minSize = 8; // Minimum size for the cat
-            this.maxSize = 48; // Maximum size for the cat
+            this.minSize = 12; // Minimum size for the cat
+            this.maxSize = 60; // Maximum size for the cat
             this.shrinkFactor = 0.01;
             this.growFactor = 0.01;
             this.x = $('#game-container').width() / 2 - this.size / 2;
@@ -89,7 +89,7 @@ $(document).ready(function () {
 
         getCooldownTime() {
             // Cooldown time increases linearly with the cat's size
-            return 1 + (this.size - this.minSize); // Minimum cooldown is 500ms, increases with size
+            return 0;// + (this.size - this.minSize); // Minimum cooldown is 500ms, increases with size
         }
 
         fireLaser() {
@@ -101,8 +101,8 @@ $(document).ready(function () {
             $laser.css({
                 left: this.x + this.size / 2,
                 top: this.y + this.size / 2,
-                width: 10, // Adjust laser width
-                height: 10, // Adjust laser height
+                width: 60, // Adjust laser width
+                height: 30, // Adjust laser height
                 position: 'absolute',
             });
             $('#game-container').append($laser);
